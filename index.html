@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3DSPMR: Vision to Geometry — 3D Spatial Memory for Sequential Embodied MLLM Reasoning and Exploration</title>
+    <meta name="description" content="Vision to Geometry: 3D Spatial Memory for Sequential Embodied MLLM Reasoning and Exploration.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+        }
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .tab-content { display: none; }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .qa-card-container { height: 460px; }
+
+        .qa-card.landscape {
+            flex-direction: column;
+            width: min-content;
+            min-width: 340px;
+        }
+        .qa-card.landscape .img-container {
+            height: 55%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .qa-card.landscape .img-container img {
+            height: 100%;
+            width: auto;
+            max-width: none;
+            object-fit: contain;
+        }
+        .qa-card.landscape .qa-text {
+            height: 45%;
+            width: 100%;
+        }
+
+        .qa-card.portrait {
+            flex-direction: row;
+            width: max-content;
+        }
+        .qa-card.portrait .img-container {
+            height: 100%;
+            width: auto;
+            border-right: 1px solid #e5e7eb;
+        }
+        .qa-card.portrait .img-container img {
+            height: 100%;
+            width: auto;
+            max-width: 400px;
+            object-fit: contain;
+        }
+        .qa-card.portrait .qa-text {
+            height: 100%;
+            width: 300px;
+            flex-shrink: 0;
+        }
+
+        .img-container img {
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .tab-content > .flex {
+            width: max-content;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .result-table th, .result-table td {
+            padding: 0.5rem 0.75rem;
+        }
+
+        /* Image fallback for missing placeholder assets */
+        img {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <header class="bg-white pt-20 pb-12 px-4 text-center">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 leading-tight">
+                Vision to Geometry: 3D Spatial Memory for Sequential Embodied MLLM Reasoning and Exploration
+            </h1>
+
+            <p class="text-2xl mb-8 text-blue-700" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 900; letter-spacing: -0.01em;">
+                Under Submission, 2026
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-x-2 md:gap-x-2.5 gap-y-2 text-base font-medium text-gray-700 mb-6">
+                <span>Author One<sup>1, *</sup></span>
+                <span>Author Two<sup>1, *</sup></span>
+                <span>Author Three<sup>2</sup></span>
+                <span>Author Four<sup>1</sup></span>
+                <span>Author Five<sup>2</sup></span>
+                <span>Senior Author<sup>1, &dagger;</sup></span>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-gray-600 mb-3">
+                <p><sup>1</sup> Institution One</p>
+                <p><sup>2</sup> Institution Two</p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-gray-600 mb-10">
+                <p><sup>*</sup> Equal contribution</p>
+                <p><sup>&dagger;</sup> Corresponding author</p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3 md:gap-5">
+                <a href="#" class="bg-gray-800 text-white px-7 py-2.5 rounded-full font-medium shadow-md hover:bg-gray-700 hover:shadow-lg transition">Paper</a>
+                <a href="#" class="bg-gray-100 border border-gray-300 text-gray-800 px-7 py-2.5 rounded-full font-medium shadow-sm hover:bg-gray-200 transition">arXiv</a>
+                <a href="#" class="bg-gray-100 border border-gray-300 text-gray-800 px-7 py-2.5 rounded-full font-medium shadow-sm hover:bg-gray-200 transition">Code</a>
+                <a href="#" class="bg-gray-100 border border-gray-300 text-gray-800 px-7 py-2.5 rounded-full font-medium shadow-sm hover:bg-gray-200 transition">Model</a>
+                <a href="#" class="bg-gray-100 border border-gray-300 text-gray-800 px-7 py-2.5 rounded-full font-medium shadow-sm hover:bg-gray-200 transition">Dataset</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- ============ TEASER ============ -->
+        <div class="bg-white pb-16">
+            <section id="teaser" class="max-w-5xl mx-auto px-4 text-center">
+                <div class="bg-gray-100 rounded-xl overflow-hidden shadow-sm border border-gray-200 flex items-center justify-center">
+                    <img src="imgs/teaser.jpg" alt="3DSPMR teaser" class="w-full h-auto rounded-xl" onerror="this.style.minHeight='320px';this.alt='[ teaser figure placeholder – imgs/teaser.jpg ]';"/>
+                </div>
+                <p class="mt-5 text-gray-600 text-left leading-relaxed max-w-4xl mx-auto px-4">
+                    3DSPMR equips a multimodal LLM with an explicit, persistent <strong>3D spatial memory</strong> built directly from vision. The memory grounds the agent's sequential reasoning and active exploration, enabling robust embodied question answering in previously unseen environments.
+                </p>
+            </section>
+        </div>
+
+        <!-- ============ ABSTRACT ============ -->
+        <div class="bg-gray-50 py-16 border-y border-gray-100">
+            <section id="abstract" class="max-w-5xl mx-auto px-4">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold inline-block border-b-2 border-gray-800 pb-2">Abstract</h2>
+                </div>
+                <p class="text-gray-700 leading-relaxed text-left text-lg max-w-4xl mx-auto px-4">
+                    Embodied agents that answer questions about the physical world must <strong>see, remember, reason, and act</strong>. Existing MLLM-based embodied agents typically operate on short context windows of raw frames, which limits their ability to integrate information across long horizons of exploration. We introduce <strong>3DSPMR</strong>, a framework that lifts streaming RGB(-D) observations into a persistent <strong>3D spatial memory</strong>, on top of which a multimodal LLM performs sequential reasoning and decides where to look next. Our memory unifies geometry, object semantics, and uncertainty in a single structured representation, allowing the agent to <strong>retrieve evidence</strong>, <strong>plan exploration</strong>, and <strong>answer questions grounded in 3D</strong> rather than 2D pixels. Extensive experiments on embodied QA benchmarks show that 3DSPMR substantially improves answer accuracy and exploration efficiency over strong frame-stack baselines, and generalizes to unseen scenes and long-horizon questions.
+                </p>
+            </section>
+        </div>
+
+        <!-- ============ QA / DEMO TABS ============ -->
+        <div class="bg-white py-16">
+            <section id="qa-samples" class="max-w-[90rem] mx-auto px-4 xl:px-8">
+                <div class="text-center mb-6 max-w-5xl mx-auto">
+                    <h2 class="text-3xl font-bold inline-block border-b-2 border-gray-800 pb-2">Question Types Supported by 3D Spatial Memory</h2>
+                </div>
+                <p class="text-gray-700 mb-10 text-left text-lg leading-relaxed max-w-4xl mx-auto px-4">
+                    Our spatial memory supports a diverse set of embodied question-answering capabilities, spanning from raw geometric perception to high-level sequential reasoning. Browse representative samples below.
+                </p>
+
+                <div class="flex flex-wrap justify-center gap-3 mb-8">
+                    <button onclick="openTab(event, 'level0')" class="tab-btn active bg-blue-600 text-white px-6 py-2.5 rounded-full font-medium text-sm shadow-md transition focus:outline-none">Level 0: Geometric Memory</button>
+                    <button onclick="openTab(event, 'level1')" class="tab-btn bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 px-6 py-2.5 rounded-full font-medium text-sm transition focus:outline-none">Level 1: Object-Level</button>
+                    <button onclick="openTab(event, 'level2')" class="tab-btn bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 px-6 py-2.5 rounded-full font-medium text-sm transition focus:outline-none">Level 2: Spatial Relations</button>
+                    <button onclick="openTab(event, 'level3')" class="tab-btn bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 px-6 py-2.5 rounded-full font-medium text-sm transition focus:outline-none">Level 3: Sequential Reasoning</button>
+                </div>
+
+                <!-- Level 0 -->
+                <div id="level0" class="tab-content active">
+                    <div class="flex gap-6 overflow-x-auto custom-scrollbar pb-6 pt-2 px-2 snap-x items-center justify-center lg:justify-start">
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level0/depth/img.png" alt="Depth Estimation" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded font-medium border border-blue-200">Per-pixel Depth</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: What is the depth of the pixel at &lt;loc0325&gt;&lt;loc0951&gt;?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> 1.17 m</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level0/pointmap/img.png" alt="3D Point Querying" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded font-medium border border-blue-200">3D Point Query</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: Return the 3D coordinates (world frame) of the pixel highlighted by the red dot.</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> (0.61 m, -0.20 m, 1.17 m)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 1 -->
+                <div id="level1" class="tab-content">
+                    <div class="flex gap-6 overflow-x-auto custom-scrollbar pb-6 pt-2 px-2 snap-x items-center">
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level1/size/img.png" alt="Object Size" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded font-medium border border-green-200">Object Size</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: How wide is the kitchen counter?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> Approximately 2.1 meters.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level1/grounding/img.png" alt="Object Grounding" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded font-medium border border-green-200">3D Grounding</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: Localize the brown leather sofa in the living room.</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> AABB center (-1.2 m, 0.4 m, 3.1 m), size (1.9 m, 0.8 m, 0.9 m).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level1/counting/img.png" alt="Counting" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded font-medium border border-green-200">Counting</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: How many chairs are around the dining table?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> 6 chairs.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 2 -->
+                <div id="level2" class="tab-content">
+                    <div class="flex gap-6 overflow-x-auto custom-scrollbar pb-6 pt-2 px-2 snap-x items-center">
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level2/distance/img.png" alt="Object Distance" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2.5 py-1 rounded font-medium border border-purple-200">Inter-object Distance</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: How far is the refrigerator from the dining table?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> 3.4 meters.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level2/relative/img.png" alt="Relative Direction" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2.5 py-1 rounded font-medium border border-purple-200">Relative Direction</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: Is the bookshelf to the left or right of the desk?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> To the left.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level2/room/img.png" alt="Room-level Layout" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2.5 py-1 rounded font-medium border border-purple-200">Room Layout</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: Which room is closest to the front door?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> The kitchen.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 3 -->
+                <div id="level3" class="tab-content">
+                    <div class="flex gap-6 overflow-x-auto custom-scrollbar pb-6 pt-2 px-2 snap-x items-center">
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level3/active_search/img.png" alt="Active Search" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-orange-100 text-orange-800 text-xs px-2.5 py-1 rounded font-medium border border-orange-200">Active Search</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: Is there a coffee machine in the apartment?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> Yes &mdash; located on the kitchen counter (found after exploring the kitchen).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level3/planning/img.png" alt="Sequential Planning" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-orange-100 text-orange-800 text-xs px-2.5 py-1 rounded font-medium border border-orange-200">Sequential Planning</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: If I want to make breakfast, what objects in this house do I need to visit, and in what order?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> Step 1: fridge (ingredients). Step 2: counter (toaster). Step 3: cabinet (plate). Step 4: dining table.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="qa-card portrait qa-card-container bg-white border border-gray-200 rounded-xl shadow-md snap-start shrink-0 overflow-hidden flex transition-all duration-300 hover:shadow-lg">
+                            <div class="img-container bg-gray-50 flex items-center justify-center p-3">
+                                <img src="qa_pairs/level3/counterfactual/img.png" alt="Counterfactual" onload="adjustCardLayout(this)"/>
+                            </div>
+                            <div class="qa-text p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                                <div class="mb-4">
+                                    <span class="inline-block bg-orange-100 text-orange-800 text-xs px-2.5 py-1 rounded font-medium border border-orange-200">Reasoning</span>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 mb-2">Q: Can the sofa be moved to face the TV without colliding with the coffee table?</p>
+                                <div class="mt-auto pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700"><strong>A:</strong> No &mdash; the available space between the sofa and the coffee table is only 0.4 m, less than the sofa's depth (0.9 m).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ METHOD / PIPELINE ============ -->
+        <div class="bg-gray-50 py-16 border-y border-gray-100">
+            <section id="method" class="max-w-5xl mx-auto px-4">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold inline-block border-b-2 border-gray-800 pb-2">Method &mdash; Vision&nbsp;to&nbsp;Geometry Pipeline</h2>
+                </div>
+                <p class="text-gray-700 mb-8 text-left text-lg leading-relaxed max-w-4xl mx-auto px-4">
+                    3DSPMR processes streaming RGB(-D) observations into a persistent <strong>3D spatial memory</strong> that fuses geometry, object semantics, and uncertainty. At each step, the MLLM reads from the memory, decides where to look next, and emits answers grounded in 3D rather than in raw pixels.
+                </p>
+                <div class="bg-white rounded-xl overflow-hidden shadow-md border border-gray-200 flex items-center justify-center py-10 px-6">
+                    <img src="imgs/pipeline.jpg" alt="3DSPMR pipeline" class="w-full md:w-3/4 h-auto object-contain rounded-md" onerror="this.style.minHeight='300px';this.alt='[ pipeline figure placeholder – imgs/pipeline.jpg ]';"/>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 max-w-5xl mx-auto">
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">1. Vision &rarr; Geometry</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">Per-frame RGB(-D) is lifted to metric-scale 3D point maps and registered into a globally consistent scene.</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">2. Spatial Memory</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">Structured object &amp; region tokens are written into a persistent memory with geometry, semantics, and visit history.</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">3. MLLM Reasoning &amp; Action</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">An MLLM reads from the memory to answer questions or to propose the next viewpoint for exploration.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ INFERENCE CAROUSEL ============ -->
+        <div class="bg-white py-16 border-b border-gray-100">
+            <section id="inference-visual" class="max-w-5xl mx-auto px-4">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold inline-block border-b-2 border-gray-800 pb-2">Sequential Reasoning &amp; Exploration</h2>
+                </div>
+                <p class="text-gray-700 mb-8 text-left text-lg leading-relaxed max-w-4xl mx-auto px-4">
+                    Step through real trajectories where 3DSPMR explores an unseen environment and incrementally answers a question.
+                </p>
+
+                <div class="flex justify-center gap-3 mb-6 overflow-x-auto custom-scrollbar pb-3 px-2" id="inference-thumbnails"></div>
+
+                <div class="max-w-5xl mx-auto relative group px-2 md:px-12">
+                    <button onclick="prevInference()" class="absolute left-0 top-1/2 -translate-y-1/2 bg-white rounded-full p-2.5 shadow-md hover:bg-gray-50 focus:outline-none z-10 border border-gray-200 transition-transform active:scale-95">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+
+                    <div class="flex flex-col lg:flex-row bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200 min-h-[420px]">
+                        <div class="w-full lg:w-[45%] bg-gray-100 flex items-center justify-center p-4 border-b lg:border-b-0 lg:border-r border-gray-200 relative">
+                            <div id="img-loader" class="absolute inset-0 flex items-center justify-center bg-gray-100 z-10 transition-opacity duration-300">
+                                <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                            </div>
+                            <img id="inference-main-img" src="" alt="Inference visual" class="max-h-[380px] w-auto object-contain drop-shadow-sm rounded-lg transition-opacity duration-500 opacity-0 z-20">
+                        </div>
+
+                        <div class="w-full lg:w-[55%] bg-[#f8fafc] flex flex-col relative">
+                            <div class="flex-1 p-6 flex flex-col justify-center gap-6 overflow-y-auto custom-scrollbar bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiNlMmU4ZjAiLz48L3N2Zz4=')]">
+                                <div class="flex flex-col items-end gap-1.5 w-full opacity-0 translate-y-4 transition-all duration-500 ease-out" id="user-msg-container">
+                                    <span class="text-xs text-gray-500 font-medium mr-1">User</span>
+                                    <div class="bg-blue-600 text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md max-w-[88%] text-[15px] leading-relaxed relative">
+                                        <p id="inference-q" class="m-0"></p>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col items-start gap-1.5 w-full opacity-0 translate-y-4 transition-all duration-500 ease-out delay-200" id="ai-msg-container">
+                                    <span class="text-xs text-gray-500 font-medium ml-1">3DSPMR Agent</span>
+                                    <div class="bg-white border border-gray-200 text-gray-800 px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-md max-w-[92%] text-[15px] leading-relaxed relative">
+                                        <p id="inference-a" class="m-0"></p>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col items-start gap-1.5 w-full opacity-0 translate-y-4 transition-all duration-500 ease-out delay-400" id="gt-msg-container">
+                                    <span class="text-xs text-green-600 font-medium ml-1">Ground Truth</span>
+                                    <div class="bg-green-50 border border-green-200 text-green-800 px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-sm max-w-[92%] text-[15px] leading-relaxed relative">
+                                        <p id="inference-gt" class="m-0"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="nextInference()" class="absolute right-0 top-1/2 -translate-y-1/2 bg-white rounded-full p-2.5 shadow-md hover:bg-gray-50 focus:outline-none z-10 border border-gray-200 transition-transform active:scale-95">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ VIDEO SHOWCASE ============ -->
+        <div class="bg-gray-50 py-16 border-y border-gray-100">
+            <section id="video" class="max-w-5xl mx-auto px-4">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold inline-block border-b-2 border-gray-800 pb-2">Video Demo</h2>
+                </div>
+                <p class="text-gray-700 mb-8 text-left text-lg leading-relaxed max-w-4xl mx-auto px-4">
+                    Watch 3DSPMR explore a never-before-seen scene while answering an embodied question.
+                </p>
+                <div class="bg-black rounded-xl overflow-hidden shadow-lg border border-gray-200 mx-auto max-w-4xl aspect-video flex items-center justify-center">
+                    <!-- Replace src with your video file or YouTube embed -->
+                    <video controls poster="imgs/video_poster.jpg" class="w-full h-full">
+                        <source src="videos/demo.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ RESULTS TABLES ============ -->
+        <div class="bg-white py-16 border-b border-gray-100">
+            <section id="results" class="max-w-[90rem] mx-auto px-4 xl:px-8">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold inline-block border-b-2 border-gray-800 pb-2">Quantitative Results</h2>
+                </div>
+
+                <div class="mb-14">
+                    <div class="text-center mb-4">
+                        <h3 class="text-xl font-semibold inline-block border-b border-gray-300 pb-1 text-gray-800">Embodied QA Benchmarks</h3>
+                    </div>
+                    <div class="relative overflow-x-auto custom-scrollbar shadow-md sm:rounded-lg border border-gray-200 max-w-5xl mx-auto">
+                        <table class="w-full text-sm text-center text-gray-600 whitespace-nowrap result-table">
+                            <thead class="text-xs text-gray-700 bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th rowspan="2" class="border-r border-gray-200 text-left font-bold bg-gray-100">Method</th>
+                                    <th rowspan="2" class="border-r border-gray-200 font-bold bg-gray-100">Input</th>
+                                    <th class="border-r border-gray-200 text-center font-bold bg-gray-100">OpenEQA ↑</th>
+                                    <th class="border-r border-gray-200 text-center font-bold bg-gray-100">HM-EQA ↑</th>
+                                    <th class="border-r border-gray-200 text-center font-bold bg-gray-100">ExploreEQA ↑</th>
+                                    <th class="text-center font-bold bg-gray-100">Avg. ↑</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <td colspan="6" class="text-left text-xs italic font-semibold text-gray-600">Frame-stack Baselines</td>
+                                </tr>
+                                <tr class="bg-white border-b hover:bg-gray-50 transition">
+                                    <td class="text-left border-r border-gray-200 text-gray-900">GPT-4o (frames)</td>
+                                    <td class="border-r border-gray-200">RGB</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td>&ndash;</td>
+                                </tr>
+                                <tr class="bg-white border-b hover:bg-gray-50 transition">
+                                    <td class="text-left border-r border-gray-200 text-gray-900">Qwen-VL (frames)</td>
+                                    <td class="border-r border-gray-200">RGB</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td>&ndash;</td>
+                                </tr>
+
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <td colspan="6" class="text-left text-xs italic font-semibold text-gray-600">Memory-based Methods</td>
+                                </tr>
+                                <tr class="bg-white border-b hover:bg-gray-50 transition">
+                                    <td class="text-left border-r border-gray-200 text-gray-900">3D-Mem</td>
+                                    <td class="border-r border-gray-200">RGB-D</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td>&ndash;</td>
+                                </tr>
+                                <tr class="bg-white border-b hover:bg-gray-50 transition">
+                                    <td class="text-left border-r border-gray-200 text-gray-900">Explore-EQA</td>
+                                    <td class="border-r border-gray-200">RGB-D</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td>&ndash;</td>
+                                </tr>
+
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <td colspan="6" class="text-left text-xs italic font-semibold text-gray-600">Our Model Variants</td>
+                                </tr>
+                                <tr class="bg-white border-b hover:bg-gray-50 transition">
+                                    <td class="text-left border-r border-gray-200 text-gray-900">3DSPMR (RGB)</td>
+                                    <td class="border-r border-gray-200">RGB</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td class="border-r border-gray-200">&ndash;</td>
+                                    <td>&ndash;</td>
+                                </tr>
+                                <tr class="bg-blue-50 border-b border-gray-200 hover:bg-blue-100 transition">
+                                    <td class="text-left border-r border-gray-200 text-gray-900 font-bold">3DSPMR (full)</td>
+                                    <td class="border-r border-gray-200 font-bold">RGB-XYZ</td>
+                                    <td class="border-r border-gray-200 font-bold">&ndash;</td>
+                                    <td class="border-r border-gray-200 font-bold">&ndash;</td>
+                                    <td class="border-r border-gray-200 font-bold">&ndash;</td>
+                                    <td class="font-bold">&ndash;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-center text-xs text-gray-500 mt-3"><strong>Bold</strong> = best; <span class="underline">underline</span> = second best. Fill in numbers in the &lt;td&gt; entries.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ ABLATION CHARTS ============ -->
+        <div class="bg-gray-50 py-16 border-y border-gray-100">
+            <section id="ablation" class="max-w-6xl mx-auto px-4">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold inline-block border-b-2 border-gray-800 pb-2">Ablation: Memory Components</h2>
+                </div>
+                <p class="text-gray-700 mb-8 text-left text-lg leading-relaxed max-w-4xl mx-auto px-4">
+                    We study the contribution of each component of 3D spatial memory (geometry / object tokens / uncertainty) and the effect of different visual encoders.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+                    <div class="lg:col-span-3 relative bg-white shadow-md sm:rounded-xl border border-gray-200 p-4 h-[400px]">
+                        <canvas id="memComponentsChart"></canvas>
+                    </div>
+                    <div class="lg:col-span-2 relative bg-white shadow-md sm:rounded-xl border border-gray-200 p-4 h-[400px]">
+                        <canvas id="explorationChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ BIBTEX ============ -->
+        <div class="bg-white py-16">
+            <section id="citation" class="max-w-4xl mx-auto px-4">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold inline-block border-b-2 border-gray-800 pb-2">BibTeX</h2>
+                </div>
+                <div class="relative bg-[#1e1e1e] rounded-xl p-6 shadow-lg border border-gray-700">
+                    <button id="copyBtn" onclick="copyBibtex()" class="absolute top-5 right-5 bg-gray-600 hover:bg-gray-500 text-white px-5 py-2 rounded-md text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-gray-400 shadow">
+                        Copy
+                    </button>
+                    <pre class="overflow-x-auto custom-scrollbar pt-8 pb-2"><code id="bibtex-content" class="text-gray-300 text-sm md:text-base font-mono block leading-relaxed">@article{anon2026threedspmr,
+  title={Vision to Geometry: 3D Spatial Memory for Sequential Embodied MLLM Reasoning and Exploration},
+  author={Author One and Author Two and Author Three and Author Four and Author Five and Senior Author},
+  journal={Under submission},
+  year={2026}
+}</code></pre>
+                </div>
+            </section>
+        </div>
+
+        <footer class="bg-white border-t border-gray-100 py-8 text-center text-sm text-gray-500">
+            <p>Page template adapted from <a href="https://microsoft.github.io/HiSpatial/" class="text-blue-600 hover:underline">HiSpatial</a>.</p>
+        </footer>
+    </main>
+
+<script>
+    // ===== Tab switching =====
+    function openTab(evt, tabId) {
+        var tabContents = document.getElementsByClassName("tab-content");
+        var tabBtns = document.getElementsByClassName("tab-btn");
+
+        for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+        for (var i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].classList.remove("active", "bg-blue-600", "text-white", "shadow-md");
+            tabBtns[i].classList.add("bg-gray-100", "text-gray-700");
+        }
+
+        document.getElementById(tabId).classList.add("active");
+        evt.currentTarget.classList.remove("bg-gray-100", "text-gray-700");
+        evt.currentTarget.classList.add("active", "bg-blue-600", "text-white", "shadow-md");
+    }
+
+    // ===== QA card aspect-ratio layout =====
+    function adjustCardLayout(img) {
+        const card = img.closest('.qa-card');
+        if (!card) return;
+        const ratio = img.naturalWidth / img.naturalHeight;
+        if (ratio > 1.2) {
+            card.classList.add('landscape');
+            card.classList.remove('portrait');
+        } else {
+            card.classList.add('portrait');
+            card.classList.remove('landscape');
+        }
+    }
+
+    // ===== Inference carousel data =====
+    const inferenceData = [
+        {
+            img: 'qa_pairs/sequential/step1.png',
+            q: 'Is there a microwave in the kitchen?',
+            a: 'Step 1 (t=0): I see the living room but no microwave yet. Moving toward the kitchen doorway.',
+            gt: ''
+        },
+        {
+            img: 'qa_pairs/sequential/step2.png',
+            q: 'Is there a microwave in the kitchen?',
+            a: 'Step 2 (t=5): Entered the kitchen. Memory now contains the counter region. Rotating to inspect the wall.',
+            gt: ''
+        },
+        {
+            img: 'qa_pairs/sequential/step3.png',
+            q: 'Is there a microwave in the kitchen?',
+            a: 'Step 3 (final): Yes &mdash; microwave detected on the counter at world coordinate (3.4, 1.1, 2.0) m.',
+            gt: 'Yes &mdash; on the kitchen counter.'
+        },
+        {
+            img: 'qa_pairs/sequential/spatial_distance.png',
+            q: 'How far is the bed from the bedroom door?',
+            a: 'Reading object tokens from memory: bed center (-2.1, 0.4, 4.5) m, door center (-2.0, 1.0, 1.8) m &rarr; horizontal distance &approx; 2.7 m.',
+            gt: '2.65 m'
+        },
+        {
+            img: 'qa_pairs/sequential/planning.png',
+            q: 'I want to charge my phone. Where should I go?',
+            a: 'Memory contains 2 outlets: one near the desk (1.8 m away) and one near the bed (4.2 m). The desk outlet is closest and has table space &rarr; go to the desk.',
+            gt: 'Desk'
+        }
+    ];
+    let currentInfIndex = 0;
+
+    function initInference() {
+        const thumbContainer = document.getElementById('inference-thumbnails');
+        thumbContainer.innerHTML = '';
+
+        inferenceData.forEach((data, index) => {
+            const btn = document.createElement('button');
+            btn.onclick = () => showInference(index);
+            btn.className = `flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-[3px] transition-all duration-300 ${index === currentInfIndex ? 'border-blue-500 shadow-md scale-110' : 'border-transparent opacity-60 hover:opacity-100 hover:border-gray-300'}`;
+
+            const img = document.createElement('img');
+            img.src = data.img;
+            img.className = 'w-full h-full object-cover bg-gray-100';
+
+            btn.appendChild(img);
+            thumbContainer.appendChild(btn);
+        });
+
+        showInference(currentInfIndex);
+    }
+
+    function showInference(index) {
+        currentInfIndex = index;
+        const data = inferenceData[index];
+
+        const thumbs = document.getElementById('inference-thumbnails').children;
+        for (let i = 0; i < thumbs.length; i++) {
+            thumbs[i].className = `flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-[3px] transition-all duration-300 ${i === index ? 'border-blue-500 shadow-md scale-110 opacity-100 z-10' : 'border-transparent opacity-60 hover:opacity-100 hover:border-gray-300 scale-100'}`;
+        }
+
+        const userMsg = document.getElementById('user-msg-container');
+        const aiMsg = document.getElementById('ai-msg-container');
+        const gtMsg = document.getElementById('gt-msg-container');
+        const mainImg = document.getElementById('inference-main-img');
+        const loader = document.getElementById('img-loader');
+
+        userMsg.classList.remove('opacity-100', 'translate-y-0');
+        userMsg.classList.add('opacity-0', 'translate-y-4');
+        aiMsg.classList.remove('opacity-100', 'translate-y-0');
+        aiMsg.classList.add('opacity-0', 'translate-y-4');
+        gtMsg.classList.remove('opacity-100', 'translate-y-0');
+        gtMsg.classList.add('opacity-0', 'translate-y-4');
+
+        mainImg.style.opacity = 0;
+        loader.style.opacity = 1;
+
+        setTimeout(() => {
+            mainImg.src = data.img;
+            document.getElementById('inference-q').innerHTML = data.q;
+            document.getElementById('inference-a').innerHTML = data.a;
+
+            if (data.gt) {
+                document.getElementById('inference-gt').innerHTML = data.gt;
+                gtMsg.style.display = 'flex';
+            } else {
+                gtMsg.style.display = 'none';
+            }
+
+            const showText = () => {
+                loader.style.opacity = 0;
+                mainImg.style.opacity = 1;
+                userMsg.classList.remove('opacity-0', 'translate-y-4');
+                userMsg.classList.add('opacity-100', 'translate-y-0');
+                setTimeout(() => {
+                    aiMsg.classList.remove('opacity-0', 'translate-y-4');
+                    aiMsg.classList.add('opacity-100', 'translate-y-0');
+                }, 400);
+                if (data.gt) {
+                    setTimeout(() => {
+                        gtMsg.classList.remove('opacity-0', 'translate-y-4');
+                        gtMsg.classList.add('opacity-100', 'translate-y-0');
+                    }, 800);
+                }
+            };
+            mainImg.onload = showText;
+            mainImg.onerror = showText;  // still reveal text if image is missing
+        }, 200);
+    }
+
+    function prevInference() {
+        let nextIdx = (currentInfIndex - 1 + inferenceData.length) % inferenceData.length;
+        showInference(nextIdx);
+    }
+
+    function nextInference() {
+        let nextIdx = (currentInfIndex + 1) % inferenceData.length;
+        showInference(nextIdx);
+    }
+
+    // ===== Charts =====
+    document.addEventListener("DOMContentLoaded", () => {
+        initInference();
+
+        document.querySelectorAll('.qa-card img').forEach(img => {
+            if (img.complete && img.naturalHeight !== 0) {
+                adjustCardLayout(img);
+            }
+        });
+
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { font: { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", size: 12 } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    titleFont: { size: 13 }, bodyFont: { size: 12 }, padding: 10, cornerRadius: 6
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true, max: 100,
+                    title: { display: true, text: 'Accuracy (%)', font: { weight: 'bold' } },
+                    grid: { color: 'rgba(243, 244, 246, 1)' }
+                },
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        };
+
+        const datasetsStyle = [
+            { label: 'Full Memory', backgroundColor: 'rgba(37, 99, 235, 0.85)', borderColor: 'rgba(37, 99, 235, 1)', borderWidth: 1, borderRadius: 4 },
+            { label: 'w/o Object Tokens', backgroundColor: 'rgba(156, 163, 175, 0.85)', borderColor: 'rgba(156, 163, 175, 1)', borderWidth: 1, borderRadius: 4 },
+            { label: 'w/o Geometry', backgroundColor: 'rgba(239, 68, 68, 0.85)', borderColor: 'rgba(239, 68, 68, 1)', borderWidth: 1, borderRadius: 4 }
+        ];
+
+        new Chart(document.getElementById('memComponentsChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['OpenEQA', 'HM-EQA', 'ExploreEQA', 'Avg.'],
+                datasets: [
+                    { ...datasetsStyle[0], data: [0, 0, 0, 0] },
+                    { ...datasetsStyle[1], data: [0, 0, 0, 0] },
+                    { ...datasetsStyle[2], data: [0, 0, 0, 0] }
+                ]
+            },
+            options: {
+                ...chartOptions,
+                plugins: { ...chartOptions.plugins, title: { display: true, text: 'Memory Component Ablation', font: { size: 15, weight: 'bold' }, padding: { bottom: 15 } } }
+            }
+        });
+
+        new Chart(document.getElementById('explorationChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Success Rate', 'Path Efficiency'],
+                datasets: [
+                    { ...datasetsStyle[0], data: [0, 0] },
+                    { ...datasetsStyle[1], data: [0, 0] },
+                    { ...datasetsStyle[2], data: [0, 0] }
+                ]
+            },
+            options: {
+                ...chartOptions,
+                plugins: { ...chartOptions.plugins, title: { display: true, text: 'Exploration Quality', font: { size: 15, weight: 'bold' }, padding: { bottom: 15 } } }
+            }
+        });
+    });
+
+    // ===== BibTeX copy =====
+    function copyBibtex() {
+        const bibtexContent = document.getElementById('bibtex-content').innerText;
+        navigator.clipboard.writeText(bibtexContent).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.innerText = 'Copied!';
+            btn.classList.add('bg-green-600', 'hover:bg-green-500');
+            btn.classList.remove('bg-gray-600', 'hover:bg-gray-500');
+
+            setTimeout(() => {
+                btn.innerText = 'Copy';
+                btn.classList.remove('bg-green-600', 'hover:bg-green-500');
+                btn.classList.add('bg-gray-600', 'hover:bg-gray-500');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    }
+</script>
+</body>
+</html>
