@@ -183,39 +183,23 @@ code{font-family:var(--mono);font-size:.92em;background:var(--band);border:1px s
 <section class="band alt" id="sequential"><div class="wrap wide">
   <h2><span>Sequential Tasks &mdash; Trajectory Comparison</span></h2>
   <p class="lede">One episode of SEER-Bench is <em>five</em> questions in a row over one apartment, sharing one map
-    and one step budget. Three episodes are replayed below &mdash; a small, a middle and a large environment &mdash;
-    each with every method running side by side, the trajectory coloured by which question was active. All three
-    stop at the <strong>first 100 steps</strong> and advance at the same rate, so the panels are directly comparable:
-    the question is what each method has answered by then.</p>
+    and one step budget. One episode is replayed below, with every method running side by side and the trajectory
+    coloured by which question was active. All panels stop at the <strong>first 100 steps</strong> and advance at the
+    same rate, so they are directly comparable: the question is what each method has answered by then.</p>
 
   <div class="seqgrid">
     <div class="figcard">
       <video controls loop muted playsinline preload="metadata"
-             poster="assets/poster_sequential_1.jpg" src="videos/sequential_1.mp4"></video>
-      <div class="figcap"><b>Middle apartment &mdash; Scene 00706.</b> Explore-EQA and GraphEQA never get past
-        question&nbsp;1: a single colour fills their panels for the whole 100 steps. 3DSPMR has answered all five
-        by step&nbsp;59.</div>
-    </div>
-    <div class="figcard">
-      <video controls loop muted playsinline preload="metadata"
              poster="assets/poster_sequential_2.jpg" src="videos/sequential_2.mp4"></video>
-      <div class="figcap"><b>Middle apartment &mdash; Scene 00217.</b> Same picture in a different flat, with the
-        infeasible questions in different places. 3DSPMR finishes in 51 steps; Explore-EQA and GraphEQA are still
+      <div class="figcap"><b>Middle apartment &mdash; Scene 00217.</b> The infeasible questions sit at
+        positions&nbsp;2 and&nbsp;4. 3DSPMR finishes all five in 51 steps; Explore-EQA and GraphEQA are still
         on question&nbsp;1 when the budget runs out.</div>
-    </div>
-    <div class="figcard">
-      <video controls loop muted playsinline preload="metadata"
-             poster="assets/poster_sequential_3.jpg" src="videos/sequential_3.mp4"></video>
-      <div class="figcap"><b>Large apartment &mdash; Scene 00202.</b> No method finishes inside 100 steps here.
-        3DSPMR is the furthest along and the most accurate of the five.</div>
     </div>
   </div>
 
-  <p class="lede" style="margin-top:24px">The separation grows with floor area. 3DSPMR explores once and then reads
-    the later answers out of the map it already built, so most of the questions after the first cost it a single step
-    &mdash; which is worth more the larger the floor plan. The infeasible questions sit at different places in each
-    episode (3&nbsp;&amp;&nbsp;5, 2&nbsp;&amp;&nbsp;4, 4&nbsp;&amp;&nbsp;5) and none of them comes first. Three
-    episodes are shown; the aggregate is in the paper.</p>
+  <p class="lede" style="margin-top:24px">3DSPMR explores once and then reads the later answers out of the map it
+    already built, so most of the questions after the first cost it a single step &mdash; which is worth more the
+    larger the floor plan. One episode is shown; the aggregate is in the paper.</p>
 </div></section>
 
 <section class="band" id="cases"><div class="wrap">
