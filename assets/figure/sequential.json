@@ -1,0 +1,196 @@
+{
+ "show_steps": 100,
+ "fps": 15,
+ "frames_per_step": 2,
+ "episodes": {
+  "00706-YHmAkqgwe2p_1": {
+   "scale": "middle",
+   "full_budget": 400,
+   "infeasible": [
+    false,
+    false,
+    true,
+    false,
+    true
+   ],
+   "methods": {
+    "Explore-EQA": {
+     "steps_per_subtask": [
+      200,
+      200,
+      1,
+      1,
+      1
+     ],
+     "answered_in_100": 0
+    },
+    "3D-Mem": {
+     "steps_per_subtask": [
+      8,
+      1,
+      33,
+      7,
+      2
+     ],
+     "answered_in_100": 5
+    },
+    "GraphEQA": {
+     "steps_per_subtask": [
+      200,
+      200,
+      1,
+      1,
+      1
+     ],
+     "answered_in_100": 0
+    },
+    "Pred-EQA": {
+     "steps_per_subtask": [
+      3,
+      1,
+      104,
+      1,
+      1
+     ],
+     "answered_in_100": 2
+    },
+    "3DSPMR (ours)": {
+     "steps_per_subtask": [
+      13,
+      30,
+      14,
+      1,
+      1
+     ],
+     "answered_in_100": 5
+    }
+   }
+  },
+  "00217-qz3829g1Lzf_1": {
+   "scale": "middle",
+   "full_budget": 400,
+   "infeasible": [
+    false,
+    true,
+    false,
+    true,
+    false
+   ],
+   "methods": {
+    "Explore-EQA": {
+     "steps_per_subtask": [
+      177,
+      200,
+      24,
+      1,
+      1
+     ],
+     "answered_in_100": 0
+    },
+    "3D-Mem": {
+     "steps_per_subtask": [
+      99,
+      1,
+      1,
+      1,
+      1
+     ],
+     "answered_in_100": 2
+    },
+    "GraphEQA": {
+     "steps_per_subtask": [
+      200,
+      111,
+      90,
+      1,
+      1
+     ],
+     "answered_in_100": 0
+    },
+    "Pred-EQA": {
+     "steps_per_subtask": [
+      65,
+      1,
+      1,
+      1,
+      1
+     ],
+     "answered_in_100": 5
+    },
+    "3DSPMR (ours)": {
+     "steps_per_subtask": [
+      47,
+      1,
+      1,
+      1,
+      1
+     ],
+     "answered_in_100": 5
+    }
+   }
+  },
+  "00202-yVbpFay8gTU_0": {
+   "scale": "large",
+   "full_budget": 640,
+   "infeasible": [
+    false,
+    false,
+    false,
+    true,
+    true
+   ],
+   "methods": {
+    "Explore-EQA": {
+     "steps_per_subtask": [
+      73,
+      320,
+      246,
+      0,
+      0
+     ],
+     "answered_in_100": 1
+    },
+    "3D-Mem": {
+     "steps_per_subtask": [
+      3,
+      9,
+      300,
+      80,
+      246
+     ],
+     "answered_in_100": 2
+    },
+    "GraphEQA": {
+     "steps_per_subtask": [
+      2,
+      320,
+      239,
+      79,
+      0
+     ],
+     "answered_in_100": 1
+    },
+    "Pred-EQA": {
+     "steps_per_subtask": [
+      13,
+      2,
+      261,
+      54,
+      38
+     ],
+     "answered_in_100": 2
+    },
+    "3DSPMR (ours)": {
+     "steps_per_subtask": [
+      89,
+      0,
+      1,
+      42,
+      0
+     ],
+     "answered_in_100": 3
+    }
+   }
+  }
+ }
+}

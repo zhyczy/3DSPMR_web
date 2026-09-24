@@ -1,60 +1,65 @@
 # 3DSPMR project page
 
-Project page scaffold for **"Vision to Geometry: 3D Spatial Memory for Sequential Embodied MLLM Reasoning and Exploration"**, adapted from the [HiSpatial](https://microsoft.github.io/HiSpatial/) template.
+Static site for **Vision to Geometry: 3D Spatial Memory for Sequential Embodied MLLM
+Reasoning and Exploration** (NeurIPS 2026, under review).
+
+The page is built around the three feasible-vs-infeasible EQA comparisons discussed in
+`latex/Neurips2026/supp.tex` §"Comparison of Feasible and Infeasible Tasks"
+(Figs. `incorrect_attribute`, `object_not_present`, `room_not_present`).
+Each case shows the two runs side by side with a shared, **normalized** progress slider —
+the two trajectories differ a lot in absolute length (e.g. 64 vs 158 steps), so aligning
+them by raw step number would park the short one at its end while the long one is still
+exploring, which is exactly the contrast the figure is meant to show.
 
 ## Layout
 
-```
-3DSPMR_web/
-├── index.html         # single-page site (Tailwind + Chart.js, CDN)
-├── imgs/              # teaser, pipeline, video poster
-├── qa_pairs/          # per-tab question images + sequential carousel frames
-├── videos/            # demo.mp4 (or swap for YouTube embed)
-└── .nojekyll          # tells GitHub Pages to serve files as-is
-```
+    index.html              the whole page (no build step, no external JS)
+    assets/cases.json       per-case Q / GT / prediction / step counts + trajectory pixel coords
+    assets/scene/<scene>.webp        one textured orthographic top-down per scene
+    assets/fp/<case>/<kind>/NNN.webp first-person frames along the recorded path
+    tools/replay_render.py  regenerates assets/ from ../visualization/ + the HM3D meshes
+    .nojekyll               GitHub Pages: serve files as-is
 
-## Sections in `index.html`
+## Regenerating the assets
 
-| anchor                    | what it is                                                 |
-|---------------------------|------------------------------------------------------------|
-| `#teaser`                 | Hero figure + one-line pitch                               |
-| `#abstract`               | Paper abstract                                             |
-| `#qa-samples`             | 4 tabs of question types (Level 0–3) with QA cards         |
-| `#method`                 | Pipeline figure + 3-step "vision → geometry → reasoning"   |
-| `#inference-visual`       | Sequential reasoning carousel (User / Agent / GT bubbles)  |
-| `#video`                  | Embedded video demo                                        |
-| `#results`                | Quantitative results table                                 |
-| `#ablation`               | Two Chart.js bar charts                                    |
-| `#citation`               | BibTeX block with copy button                              |
+    /egr/research-actionlab/caizhon2/miniconda3/envs/3dmem/bin/python tools/replay_render.py
 
-## Things to fill in
+**No re-inference.** The agent's positions come from the `Current position: [x, y, z]` lines in
+each run's log; the script only puts a camera at those positions and re-renders. For each scene it
+renders one textured orthographic top-down with a fixed viewport, so the world-to-pixel mapping is
+analytic (`u = W/2 + (x-cx)/half * W/2`, same for `z`) and the trajectory can be projected exactly —
+validated by checking the path lands on walkable floor and threads through doorways.
 
-Search `index.html` for these placeholders:
+Two things worth knowing:
 
-- **Authors / affiliations** — in the `<header>` block.
-- **Links** — five `<a href="#">` buttons (Paper, arXiv, Code, Model, Dataset).
-- **Abstract** — paragraph inside `#abstract`.
-- **Result numbers** — `–` placeholders in the `<table>` inside `#results`.
-- **Ablation data** — `[0, 0, 0, 0]` arrays in the `Chart` constructors at the bottom of `<script>`.
-- **Inference carousel** — edit the `inferenceData = [ … ]` array.
-- **Figures** — drop files into `imgs/` (`teaser.jpg`, `pipeline.jpg`, `video_poster.jpg`) and `qa_pairs/...` per the structure in `qa_pairs/README.txt`.
-- **BibTeX** — update the `<code id="bibtex-content">` block.
+* **Heading is not recorded.** The logs contain position but no rotation, so the replay camera faces
+  the direction of travel. The first-person frames show *where the agent went*, not necessarily
+  where it was looking.
+* **The runs' own `map/step_*.png` are not used.** They are re-framed per step (image size changes
+  from 901x978 to 959x931 within one episode, and the px-per-metre ratio swings between 21 and 76),
+  so scrubbing through them makes the map drift and the trajectory cannot be recovered from them.
+  Rendering our own fixed viewport avoids both problems.
 
-## Preview locally
+Trajectories are stored as pixel coordinates in `cases.json` and drawn on a `<canvas>` in the
+browser rather than baked into one image per step — a few hundred numbers instead of a few hundred
+images.
 
-```bash
-cd 3DSPMR_web
-python -m http.server 8000
-# open http://localhost:8000
-```
+## Source runs
 
-## Deploy to GitHub Pages
+| Case | Feasible | Infeasible |
+|---|---|---|
+| Incorrect Attribute | `00824-Dd4bFSTQ8gi_4` (64 steps) | `00824-Dd4bFSTQ8gi_3` (158 steps) |
+| Object not Present  | `00848-ziup5kvtCCR_3` (10 steps) | `00255-NGyoyh91xXJ_3` (120 steps) |
+| Room not Present    | `00166-RaYrxWt5pR1_2` (8 steps)  | `00164-XfUxBGTFQQb_2` (24 steps) |
 
-1. Push this directory to a repo (or to the `gh-pages` branch of an existing one).
-2. In repo Settings → Pages, set source to the branch/folder where `index.html` lives.
-3. The `.nojekyll` file ensures underscore-prefixed paths aren't filtered.
+## Ground-truth corrections
 
-## Credits
+`tools/build_assets.py` carries a small `GT_FIX` table keyed by `(episode, qa_id)`.
+Currently one entry: `00824-Dd4bFSTQ8gi_4` Q1's answer is shown as
+*"A toilet paper holder"* instead of the string recorded in the run.
+The recorded `result.json` / `total_result.json` are deliberately **not** edited — they
+are the record of what was actually evaluated. If a correction also needs to hold for the
+benchmark itself, it has to be made at the annotation source and the affected gradings
+re-run, which changes the reported scores and is out of this script's scope.
 
-Layout adapted from the HiSpatial project page (Tailwind CSS + Chart.js).
-# 3DSPMR_web
+The author block is intentionally anonymous — the paper is under review.
